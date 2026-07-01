@@ -3,93 +3,158 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Percakapan Presenter</title>
+<title>Percakapan Presenter Pro</title>
 
 <!-- SheetJS untuk parsing Excel -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
+<!-- Google Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
 <style>
+  /* ===== CSS VARIABLES & DESIGN SYSTEM ===== */
+  :root {
+    --bg-primary: #090d16;
+    --bg-secondary: #111827;
+    --bg-card: rgba(17, 24, 39, 0.7);
+    --border-color: rgba(255, 255, 255, 0.08);
+    --border-active: rgba(59, 130, 246, 0.4);
+    --text-main: #f3f4f6;
+    --text-muted: #9ca3af;
+    --primary: #3b82f6;
+    --primary-hover: #2563eb;
+    --primary-glow: rgba(59, 130, 246, 0.25);
+    --success: #10b981;
+    --success-hover: #059669;
+    --danger: #ef4444;
+    --danger-hover: #dc2626;
+    --warning: #f59e0b;
+    --warning-hover: #d97706;
+    --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  }
+
   /* ===== RESET & BASE ===== */
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  
   body {
-    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-    background: #0f172a;
-    color: #e2e8f0;
+    font-family: var(--font-sans);
+    background: radial-gradient(circle at top, #1e293b 0%, #090d16 100%);
+    background-attachment: fixed;
+    color: var(--text-main);
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    overflow-x: hidden;
   }
 
   /* ===== HEADER ===== */
   header {
-    background: #1e293b;
-    padding: 16px 24px;
+    background: rgba(17, 24, 39, 0.75);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    padding: 18px 32px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     flex-wrap: wrap;
-    gap: 12px;
-    border-bottom: 1px solid #334155;
-    box-shadow: 0 2px 12px rgba(0,0,0,.3);
+    gap: 16px;
+    border-bottom: 1px solid var(--border-color);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
     position: relative;
     z-index: 10;
   }
+  
   header h1 {
-    font-size: 1.25rem;
-    font-weight: 600;
-    background: linear-gradient(135deg, #60a5fa, #a78bfa);
+    font-size: 1.4rem;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 50%, #f472b6 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+    display: flex;
+    align-items: center;
+    gap: 8px;
   }
-  .header-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  
+  .header-actions { display: flex; gap: 10px; flex-wrap: wrap; }
 
   /* ===== BUTTONS ===== */
   .btn {
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 8px 16px; border: none; border-radius: 8px;
-    font-size: .875rem; font-weight: 500; cursor: pointer;
-    transition: all .2s; white-space: nowrap;
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 20px; border: 1px solid transparent; border-radius: 12px;
+    font-size: .875rem; font-weight: 600; cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); 
+    white-space: nowrap;
+    color: #fff;
   }
   .btn:active { transform: scale(.96); }
-  .btn-primary  { background: #3b82f6; color: #fff; }
-  .btn-primary:hover { background: #2563eb; }
-  .btn-success  { background: #22c55e; color: #fff; }
-  .btn-success:hover { background: #16a34a; }
-  .btn-danger   { background: #ef4444; color: #fff; }
-  .btn-danger:hover { background: #dc2626; }
-  .btn-warning  { background: #f59e0b; color: #1e293b; }
-  .btn-warning:hover { background: #d97706; }
-  .btn-ghost    { background: transparent; color: #94a3b8; border:1px solid #334155; }
-  .btn-ghost:hover { background: #1e293b; color: #e2e8f0; }
-  .btn-sm { padding: 5px 10px; font-size: .8rem; }
-  .btn:disabled { opacity: .4; cursor: not-allowed; transform: none; }
+  .btn-primary  { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
+  .btn-primary:hover { background: linear-gradient(135deg, #2563eb, #1e40af); box-shadow: 0 0 15px var(--primary-glow); }
+  .btn-success  { background: linear-gradient(135deg, #10b981, #047857); }
+  .btn-success:hover { background: linear-gradient(135deg, #059669, #065f46); }
+  .btn-danger   { background: linear-gradient(135deg, #ef4444, #b91c1c); }
+  .btn-danger:hover { background: linear-gradient(135deg, #dc2626, #991b1b); }
+  .btn-warning  { background: linear-gradient(135deg, #f59e0b, #b45309); }
+  .btn-warning:hover { background: linear-gradient(135deg, #d97706, #78350f); }
+  
+  .btn-ghost {
+    background: rgba(255, 255, 255, 0.03); 
+    color: #e5e7eb; 
+    border: 1px solid var(--border-color); 
+  }
+  .btn-ghost:hover { 
+    background: rgba(255, 255, 255, 0.08); 
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+  
+  .btn-sm { padding: 7px 14px; font-size: .8rem; border-radius: 10px; }
+  .btn:disabled { opacity: .3; cursor: not-allowed; transform: none; box-shadow: none; }
 
   /* ===== MAIN LAYOUT ===== */
   .main-container {
     flex: 1; display: flex; flex-direction: column;
-    max-width: 900px; width: 100%; margin: 0 auto;
-    padding: 20px 16px; gap: 16px;
+    max-width: 1000px; width: 100%; margin: 0 auto;
+    padding: 32px 24px; gap: 24px;
   }
 
   /* ===== UPLOAD ZONE ===== */
   .upload-zone {
-    border: 2px dashed #334155;
-    border-radius: 16px; padding: 40px 20px;
+    border: 2px dashed rgba(255, 255, 255, 0.15);
+    border-radius: 24px; padding: 50px 24px;
     text-align: center; cursor: pointer;
-    transition: all .3s; background: #1e293b;
+    transition: all .3s ease; 
+    background: var(--bg-card);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     position: relative;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
   }
   .upload-zone:hover, .upload-zone.drag-over {
-    border-color: #3b82f6; background: #1e3a5f;
+    border-color: var(--primary); 
+    background: rgba(59, 130, 246, 0.05);
+    box-shadow: 0 8px 32px rgba(59, 130, 246, 0.1);
   }
-  .upload-zone .icon { font-size: 3rem; margin-bottom: 8px; }
-  .upload-zone p { color: #94a3b8; font-size: .95rem; }
+  .upload-zone .icon { 
+    font-size: 3.5rem; 
+    margin-bottom: 16px;
+    background: linear-gradient(135deg, #3b82f6, #a78bfa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .upload-zone p { color: var(--text-muted); font-size: 1rem; }
   .upload-zone .formats {
-    margin-top: 12px; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;
+    margin-top: 20px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;
   }
   .upload-zone .formats span {
-    background: #334155; padding: 4px 12px; border-radius: 20px;
-    font-size: .8rem; color: #cbd5e1;
+    background: rgba(255, 255, 255, 0.05); 
+    padding: 6px 16px; 
+    border-radius: 30px;
+    font-size: .8rem; 
+    color: #d1d5db;
+    border: 1px solid var(--border-color);
   }
   .upload-zone input[type="file"] {
     position: absolute; inset: 0; opacity: 0; cursor: pointer;
@@ -98,182 +163,265 @@
   /* ===== FILE INFO BAR ===== */
   .file-info {
     display: flex; align-items: center; justify-content: space-between;
-    padding: 12px 16px; background: #1e293b; border-radius: 12px;
-    border: 1px solid #334155;
+    padding: 16px 24px; 
+    background: var(--bg-card); 
+    border-radius: 16px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
   }
-  .file-info .name { font-weight: 500; color: #60a5fa; }
-  .file-info .count { color: #94a3b8; font-size: .875rem; }
+  .file-info .name { font-weight: 600; color: #60a5fa; font-size: 0.95rem; }
+  .file-info .count { color: var(--text-muted); font-size: .875rem; }
 
   /* ===== CONTROLS BAR ===== */
   .controls {
     display: flex; align-items: center; justify-content: center;
-    gap: 8px; padding: 12px 16px;
-    background: #1e293b; border-radius: 12px;
-    border: 1px solid #334155;
+    gap: 16px; padding: 16px 24px;
+    background: var(--bg-card); 
+    border-radius: 16px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
     flex-wrap: wrap;
   }
-  .controls .nav-group { display: flex; gap: 4px; }
+  .controls .nav-group { display: flex; gap: 6px; }
   .controls .sep {
-    width: 1px; height: 28px; background: #334155; margin: 0 4px;
+    width: 1px; height: 28px; background: rgba(255, 255, 255, 0.1); margin: 0 8px;
   }
   .controls .counter {
-    font-size: .875rem; color: #94a3b8; min-width: 80px; text-align: center;
+    font-size: .95rem; 
+    font-weight: 700;
+    color: #e5e7eb; 
+    min-width: 90px; 
+    text-align: center;
   }
   .controls .speed-control {
-    display: flex; align-items: center; gap: 6px;
-    font-size: .8rem; color: #94a3b8;
+    display: flex; align-items: center; gap: 10px;
+    font-size: .85rem; color: var(--text-muted);
   }
   .controls .speed-control input[type="range"] {
-    width: 80px; accent-color: #3b82f6;
+    width: 100px; 
+    accent-color: var(--primary);
+    cursor: pointer;
   }
 
   /* ===== CHAT AREA ===== */
   .chat-container {
     flex: 1; display: flex; flex-direction: column;
-    gap: 12px; padding: 20px 16px;
-    background: #1e293b; border-radius: 16px;
-    border: 1px solid #334155;
-    min-height: 400px; max-height: 65vh;
+    gap: 16px; padding: 28px;
+    background: var(--bg-card); 
+    border-radius: 24px;
+    border: 1px solid var(--border-color);
+    min-height: 450px; max-height: 60vh;
     overflow-y: auto; position: relative;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+    scroll-behavior: smooth;
   }
-  .chat-container::-webkit-scrollbar { width: 6px; }
+  .chat-container::-webkit-scrollbar { width: 8px; }
   .chat-container::-webkit-scrollbar-track { background: transparent; }
-  .chat-container::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+  .chat-container::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 4px; }
+  .chat-container::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.2); }
 
   /* ===== EMPTY STATE ===== */
   .empty-state {
     flex: 1; display: flex; flex-direction: column;
     align-items: center; justify-content: center;
-    color: #475569; gap: 12px; text-align: center;
+    color: var(--text-muted); gap: 16px; text-align: center;
   }
-  .empty-state .icon { font-size: 4rem; }
-  .empty-state h3 { font-size: 1.2rem; color: #64748b; }
+  .empty-state .icon { 
+    font-size: 4.5rem; 
+    animation: pulse 2s infinite alternate;
+  }
+  .empty-state h3 { font-size: 1.35rem; color: #f3f4f6; font-weight: 700; }
+  .empty-state p { font-size: 0.95rem; max-width: 320px; line-height: 1.5; }
+  
+  @keyframes pulse {
+    0% { transform: scale(1); opacity: 0.7; }
+    100% { transform: scale(1.05); opacity: 1; }
+  }
 
   /* ===== CHAT BUBBLE ===== */
   .chat-bubble {
-    display: flex; gap: 12px; max-width: 85%;
-    animation: fadeIn .3s ease;
-    opacity: 0.6; transition: all .4s;
+    display: flex; gap: 16px; max-width: 80%;
+    opacity: 0.35; 
+    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    transform: translateY(10px) scale(0.98);
   }
   .chat-bubble.active {
-    opacity: 1; transform: scale(1.02);
+    opacity: 1; 
+    transform: translateY(0) scale(1.02);
   }
-  .chat-bubble.active .bubble {
-    box-shadow: 0 0 20px rgba(59,130,246,.25);
-  }
+  
   .chat-bubble.outgoing { align-self: flex-end; flex-direction: row-reverse; }
   .chat-bubble.incoming { align-self: flex-start; }
 
   .chat-bubble .avatar {
-    width: 40px; height: 40px; border-radius: 50%;
+    width: 44px; height: 44px; border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
-    font-weight: 700; font-size: 1rem; flex-shrink: 0;
+    font-weight: 800; font-size: 1.1rem; flex-shrink: 0;
     color: #fff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+    border: 2px solid rgba(255, 255, 255, 0.1);
   }
-  .chat-bubble .body { display: flex; flex-direction: column; gap: 4px; }
+  .chat-bubble .body { display: flex; flex-direction: column; gap: 6px; }
   .chat-bubble .speaker-name {
-    font-size: .8rem; font-weight: 600; opacity: .9;
+    font-size: .8rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;
   }
+  
+  .chat-bubble.outgoing .speaker-name { align-self: flex-end; }
+  .chat-bubble.incoming .speaker-name { align-self: flex-start; }
+
   .chat-bubble .bubble {
-    padding: 12px 16px; border-radius: 16px;
-    line-height: 1.6; font-size: 1rem;
+    padding: 16px 22px; border-radius: 20px;
+    line-height: 1.6; font-size: 1.05rem;
     word-break: break-word;
-    position: relative;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+    border: 1px solid rgba(255,255,255,0.05);
   }
   .chat-bubble.incoming .bubble {
-    background: #334155; color: #e2e8f0;
-    border-bottom-left-radius: 4px;
+    background: rgba(31, 41, 55, 0.85); color: #f3f4f6;
+    border-top-left-radius: 4px;
   }
   .chat-bubble.outgoing .bubble {
-    background: #3b82f6; color: #fff;
-    border-bottom-right-radius: 4px;
+    background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #fff;
+    border-top-right-radius: 4px;
+    border: none;
   }
-  .chat-bubble .timestamp {
-    font-size: .7rem; color: #64748b; margin-top: 2px;
+  
+  .chat-bubble.active.incoming .bubble {
+    border-color: var(--primary);
+    box-shadow: 0 0 25px rgba(59, 130, 246, 0.2);
+  }
+  .chat-bubble.active.outgoing .bubble {
+    box-shadow: 0 0 25px rgba(37, 99, 235, 0.4);
   }
 
   /* ===== SAMPLE DATA PREVIEW ===== */
   .sample-data {
-    background: #1e293b; border-radius: 12px; border: 1px solid #334155;
+    background: var(--bg-card); border-radius: 16px; border: 1px solid var(--border-color);
     overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
   }
   .sample-data summary {
-    padding: 12px 16px; cursor: pointer;
-    font-weight: 500; color: #94a3b8;
+    padding: 16px 24px; cursor: pointer;
+    font-weight: 600; color: var(--text-muted);
     user-select: none;
+    transition: color 0.2s;
   }
-  .sample-data summary:hover { color: #e2e8f0; }
+  .sample-data summary:hover { color: #f3f4f6; }
   .sample-data pre {
-    padding: 16px; overflow-x: auto; font-size: .8rem;
-    background: #0f172a; color: #a5b4fc; line-height: 1.5;
-    border-top: 1px solid #334155;
+    padding: 20px; overflow-x: auto; font-size: .85rem;
+    background: rgba(9, 13, 22, 0.8); color: #a5b4fc; line-height: 1.6;
+    border-top: 1px solid var(--border-color);
+    font-family: 'Courier New', Courier, monospace;
   }
 
-  /* ===== FULLSCREEN MODE ===== */
+  /* ===== FULLSCREEN PRESENTATION MODE (MODERN DESIGN) ===== */
+  .fullscreen-mode {
+    background: radial-gradient(circle at center, #111827 0%, #030712 100%) !important;
+  }
+
   .fullscreen-mode .main-container {
     max-width: 100%; padding: 0; height: 100vh; margin: 0;
+    justify-content: center;
   }
   .fullscreen-mode header,
   .fullscreen-mode .upload-zone,
   .fullscreen-mode .file-info,
   .fullscreen-mode .controls,
-  .fullscreen-mode .sample-data { display: none; }
+  .fullscreen-mode .sample-data { display: none !important; }
+  
   .fullscreen-mode .chat-container {
     max-height: none; border-radius: 0; border: none;
-    min-height: 100vh; flex: 1;
-    justify-content: center; padding: 40px 24px;
+    min-height: 100vh; height: 100vh; flex: 1;
+    justify-content: center; 
+    padding: 80px 10%;
+    background: transparent;
+    box-shadow: none;
+    overflow-y: hidden; /* Hide scrollbar for presentation feel */
+  }
+
+  /* Big visual presentation focus */
+  .fullscreen-mode .chat-bubble {
+    font-size: 1.5rem;
+    max-width: 75%;
+    opacity: 0.1;
+    transform: scale(0.9) translateY(20px);
+    transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  
+  .fullscreen-mode .chat-bubble.active {
+    opacity: 1;
+    transform: scale(1.05) translateY(0);
+    z-index: 5;
+  }
+
+  /* Make adjacent messages slightly visible but faded and small */
+  .fullscreen-mode .chat-bubble.prev-active {
+    opacity: 0.65;
+    transform: scale(0.95) translateY(-5px);
+  }
+  .fullscreen-mode .chat-bubble.next-active {
+    opacity: 0.65;
+    transform: scale(0.95) translateY(5px);
+  }
+  
+  /* Sembunyikan sisa pesan di layar agar pas minimal/maksimal 3 */
+  .fullscreen-mode .chat-bubble.fs-hidden {
+    display: none !important;
+  }
+
+  .fullscreen-mode .chat-bubble .avatar {
+    width: 60px; height: 60px;
+    font-size: 1.4rem;
+  }
+  
+  .fullscreen-mode .chat-bubble .bubble {
+    padding: 24px 32px;
+    font-size: 1.35rem;
+    border-radius: 28px;
+  }
+  .fullscreen-mode .chat-bubble.incoming .bubble {
+    border-top-left-radius: 6px;
+    background: rgba(31, 41, 55, 0.9);
+  }
+  .fullscreen-mode .chat-bubble.outgoing .bubble {
+    border-top-right-radius: 6px;
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
   }
 
   .fullscreen-mode .controls-overlay {
-    position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-    display: flex; gap: 6px; z-index: 100;
-    background: rgba(15,23,42,.85); backdrop-filter: blur(8px);
-    padding: 8px 12px; border-radius: 40px;
-    border: 1px solid #334155;
-    opacity: 0; transition: opacity .3s;
+    position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+    display: flex; gap: 10px; z-index: 100;
+    background: rgba(17, 24, 39, 0.85); 
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    padding: 12px 24px; border-radius: 40px;
+    border: 1px solid rgba(255,255,255,0.1);
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+    opacity: 0; transition: opacity .4s ease;
+    align-items: center;
   }
-  .fullscreen-mode:hover .controls-overlay { opacity: 1; }
-  .fullscreen-mode .controls-overlay .btn { font-size: .8rem; padding: 4px 10px; }
-
-  /* ===== ANIMATIONS ===== */
-  @keyframes fadeIn {
-    0% { opacity: 0; transform: translateY(12px); }
-    100% { opacity: 1; transform: translateY(0); }
-  }
-
-  /* ===== RESPONSIVE ===== */
-  @media (max-width: 600px) {
-    header h1 { font-size: 1rem; }
-    .chat-bubble { max-width: 95%; }
-    .chat-bubble .bubble { font-size: .9rem; padding: 10px 14px; }
-    .upload-zone { padding: 24px 16px; }
-    .upload-zone .icon { font-size: 2rem; }
-    .controls .speed-control { display: none; }
-  }
-
-  /* ===== HIGHLIGHT ===== */
-  .highlight {
-    background: linear-gradient(120deg, #3b82f6 0%, #8b5cf6 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    font-weight: 600;
-  }
-
+  .fullscreen-mode:hover .controls-overlay,
+  .fullscreen-mode .controls-overlay:hover { opacity: 1; }
+  .fullscreen-mode .controls-overlay .btn { font-size: .85rem; padding: 8px 16px; border-radius: 20px; }
+  
   /* Scroll to bottom button */
   .scroll-bottom-btn {
     position: sticky; bottom: 8px; display: none;
-    margin: 0 auto; padding: 6px 16px; border-radius: 20px;
-    background: #334155; color: #94a3b8; border: 1px solid #475569;
-    cursor: pointer; font-size: .8rem; transition: all .2s;
+    margin: 0 auto; padding: 8px 20px; border-radius: 24px;
+    background: rgba(31, 41, 55, 0.9); color: var(--text-main); 
+    border: 1px solid var(--border-color);
+    cursor: pointer; font-size: .85rem; font-weight: 600;
+    transition: all .2s;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.25);
   }
-  .scroll-bottom-btn:hover { background: #475569; color: #e2e8f0; }
+  .scroll-bottom-btn:hover { background: #374151; color: #fff; }
 </style>
 </head>
 <body>
 
 <!-- ===== HEADER ===== -->
 <header>
-  <h1>💬 Percakapan Presenter</h1>
+  <h1><span>💬</span> Percakapan Presenter Pro</h1>
   <div class="header-actions">
     <button class="btn btn-ghost btn-sm" onclick="toggleFullscreen()" title="Mode Presentasi">⛶ Fullscreen</button>
     <button class="btn btn-ghost btn-sm" onclick="resetAll()" title="Reset">⟲ Reset</button>
@@ -285,8 +433,8 @@
   <!-- Upload Zone -->
   <div class="upload-zone" id="uploadZone">
     <div class="icon">📂</div>
-    <p><strong>Klik atau tarik file ke sini</strong></p>
-    <p style="font-size:.85rem;margin-top:4px;">File akan diproses otomatis</p>
+    <p style="font-size: 1.15rem; font-weight: 700; color: #f3f4f6; margin-bottom: 6px;">Tarik & Lepas File di Sini</p>
+    <p style="font-size:.9rem; color: var(--text-muted);">Mendukung format file modern Excel, TXT, dan JSON</p>
     <div class="formats">
       <span>📊 Excel (.xlsx, .xls)</span>
       <span>📄 TXT (.txt)</span>
@@ -327,15 +475,13 @@
   <div class="chat-container" id="chatContainer">
     <div class="empty-state" id="emptyState">
       <div class="icon">💬</div>
-      <h3>Belum ada percakapan</h3>
-      <p style="color:#64748b;">Upload file Excel, TXT, atau JSON untuk memulai</p>
-      <div style="margin-top:16px;font-size:.85rem;color:#475569;">
-        <p>📌 Format file:</p>
-        <div style="text-align:left;margin-top:8px;">
-          <b>Excel:</b> Kolom A = speaker, Kolom B = teks<br>
-          <b>TXT:</b> <code>Nama: teks</code> tiap baris<br>
-          <b>JSON:</b> Array objek <code>{"speaker":"","text":""}</code>
-        </div>
+      <h3>Belum Ada Percakapan</h3>
+      <p>Unggah file obrolan Anda untuk mempresentasikannya dengan indah atau muat template di bawah.</p>
+      <div style="margin-top:20px; font-size:.85rem; color: var(--text-muted); background: rgba(255,255,255,0.02); padding: 16px; border-radius: 12px; border: 1px solid var(--border-color); text-align: left; max-width: 420px; line-height: 1.6;">
+        <span style="font-weight: 700; color: #f3f4f6; display: block; margin-bottom: 6px;">💡 Panduan Format Kolom:</span>
+        <b>Excel:</b> Kolom A = Speaker, Kolom B = Teks pesan<br>
+        <b>TXT:</b> Format baris <code>Speaker: Teks pesan</code><br>
+        <b>JSON:</b> Array objek <code>{"speaker": "A", "text": "Halo"}</code>
       </div>
     </div>
     <div id="chatMessages"></div>
@@ -344,7 +490,7 @@
 
   <!-- Sample Data -->
   <details class="sample-data">
-    <summary>📝 Lihat contoh format file</summary>
+    <summary>📝 Lihat contoh format file &amp; muat template</summary>
     <pre id="sampleOutput">Memuat contoh...</pre>
   </details>
 </div>
@@ -353,11 +499,11 @@
 <div class="controls-overlay" id="fullscreenControls" style="display:none;">
   <button class="btn btn-ghost btn-sm" onclick="goFirst()">⏮</button>
   <button class="btn btn-ghost btn-sm" onclick="goPrev()">◀</button>
-  <span class="counter" style="font-size:.8rem;color:#94a3b8;min-width:60px;text-align:center;" id="fsCounter"></span>
+  <span class="counter" style="font-size:.9rem; color:#f3f4f6; min-width:80px; text-align:center; font-weight:700;" id="fsCounter"></span>
   <button class="btn btn-ghost btn-sm" onclick="goNext()">▶</button>
   <button class="btn btn-ghost btn-sm" onclick="goLast()">⏭</button>
   <button class="btn btn-success btn-sm" id="fsPlayBtn" onclick="togglePlay()">▶</button>
-  <button class="btn btn-ghost btn-sm" onclick="toggleFullscreen()">✕</button>
+  <button class="btn btn-ghost btn-sm" onclick="toggleFullscreen()">✕ Keluar</button>
 </div>
 
 <script>
@@ -374,11 +520,11 @@
   };
 
   // Warna untuk setiap speaker
-  const speakerColors = {};
+  let speakerColors = {};
   const palette = [
-    '#3b82f6', '#ef4444', '#22c55e', '#f59e0b', '#a855f7',
-    '#ec4899', '#06b6d4', '#84cc16', '#f97316', '#8b5cf6',
-    '#14b8a6', '#e11d48', '#0ea5e9', '#d946ef', '#10b981',
+    '#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6',
+    '#ec4899', '#06b6d4', '#84cc16', '#f97316', '#a855f7',
+    '#14b8a6', '#e11d48', '#0ea5e9', '#d946ef', '#059669',
   ];
   let colorIdx = 0;
 
@@ -390,8 +536,18 @@
     return speakerColors[speaker];
   }
 
+  // Tentukan sisi obrolan berdasarkan pembicara (pembicara 1 = incoming, pembicara 2 = outgoing, dst)
+  let speakerSides = {};
+  function getSpeakerSide(speaker) {
+    if (!speakerSides[speaker]) {
+      const index = Object.keys(speakerSides).length;
+      speakerSides[speaker] = index % 2 === 0 ? 'incoming' : 'outgoing';
+    }
+    return speakerSides[speaker];
+  }
+
   function getInitials(name) {
-    return name ? name.charAt(0).toUpperCase() : '?';
+    return name ? name.substring(0, 2).toUpperCase() : '?';
   }
 
   // ============================================================
@@ -422,18 +578,12 @@
   const sampleConversations = {
     json: [
       { speaker: 'Andi', text: 'Halo Budi! Selamat pagi. Apa kabarmu hari ini?' },
-      { speaker: 'Budi', text: 'Selamat pagi Andi! Kabarku baik. Kamu sendiri bagaimana?' },
-      { speaker: 'Andi', text: 'Baik juga. Ngomong-ngomong, bagaimana dengan proyek kemarin?' },
-      { speaker: 'Budi', text: 'Sudah selesai 80%. Tinggal bagian testing saja.' },
-      { speaker: 'Andi', text: 'Bagus! Kalau begitu kita bisa presentasi hari Jumat.' },
-      { speaker: 'Budi', text: 'Setuju. Aku siapkan materi presentasinya.' },
-    ],
-    txt: `Andi: Halo Budi! Selamat pagi. Apa kabarmu hari ini?
-Budi: Selamat pagi Andi! Kabarku baik. Kamu sendiri bagaimana?
-Andi: Baik juga. Ngomong-ngomong, bagaimana dengan proyek kemarin?
-Budi: Sudah selesai 80%. Tinggal bagian testing saja.
-Andi: Bagus! Kalau begitu kita bisa presentasi hari Jumat.
-Budi: Setuju. Aku siapkan materi presentasinya.`,
+      { speaker: 'Budi', text: 'Selamat pagi Andi! Kabarku baik sekali. Kamu sendiri bagaimana?' },
+      { speaker: 'Andi', text: 'Luar biasa baik juga. Ngomong-ngomong, bagaimana progres proyek Presenter kita?' },
+      { speaker: 'Budi', text: 'Sudah selesai 95%! Saya baru saja memperbarui desainnya menjadi modern dan profesional.' },
+      { speaker: 'Andi', text: 'Wah, keren sekali! Mari kita langsung coba uji coba fiturnya.' },
+      { speaker: 'Budi', text: 'Tentu, silakan aktifkan mode fullscreen presentasi sekarang.' },
+    ]
   };
 
   // ============================================================
@@ -443,7 +593,6 @@ Budi: Setuju. Aku siapkan materi presentasinya.`,
     const lines = text.split(/\r?\n/).filter(l => l.trim());
     const messages = [];
     for (const line of lines) {
-      // Format: "Speaker: teks" — split on first colon
       const idx = line.indexOf(':');
       if (idx > 0) {
         const speaker = line.slice(0, idx).trim();
@@ -456,6 +605,7 @@ Budi: Setuju. Aku siapkan materi presentasinya.`,
     return messages;
   }
 
+  // Robust parsing: JSON array
   function parseJSON(text) {
     const data = JSON.parse(text);
     if (!Array.isArray(data)) throw new Error('JSON harus berupa array');
@@ -504,9 +654,39 @@ Budi: Setuju. Aku siapkan materi presentasinya.`,
       const isActive = i === state.currentIndex;
       const color = getSpeakerColor(msg.speaker);
       const initials = getInitials(msg.speaker);
-      const side = i % 2 === 0 ? 'incoming' : 'outgoing';
+      const side = getSpeakerSide(msg.speaker);
+      
+      // Fullscreen adjacent focus classes
+      let relativeClass = '';
+      if (state.isFullscreen) {
+        let isVisible = false;
+        const total = state.messages.length;
+        const curr = state.currentIndex;
+        
+        // Menentukan jendela 3 pesan agar selalu terlihat 3 pesan di satu layar
+        if (total <= 3) {
+          isVisible = true;
+        } else if (curr === 0) {
+          // Tampilkan index 0, 1, 2
+          if (i === 0 || i === 1 || i === 2) isVisible = true;
+        } else if (curr === total - 1) {
+          // Tampilkan 3 index terakhir
+          if (i === total - 1 || i === total - 2 || i === total - 3) isVisible = true;
+        } else {
+          // Tampilkan curr-1, curr, curr+1
+          if (i === curr - 1 || i === curr || i === curr + 1) isVisible = true;
+        }
+        
+        if (!isVisible) {
+          relativeClass = 'fs-hidden';
+        } else {
+          if (i < curr) relativeClass = 'prev-active';
+          else if (i > curr) relativeClass = 'next-active';
+        }
+      }
+
       return `
-        <div class="chat-bubble ${side} ${isActive ? 'active' : ''}" data-index="${i}">
+        <div class="chat-bubble ${side} ${isActive ? 'active' : ''} ${relativeClass}" data-index="${i}">
           <div class="avatar" style="background:${color}">${initials}</div>
           <div class="body">
             <span class="speaker-name" style="color:${color}">${escapeHtml(msg.speaker)}</span>
@@ -565,6 +745,7 @@ Budi: Setuju. Aku siapkan materi presentasinya.`,
     render();
   }
 
+  // Auto scroll/next
   function goNext() {
     if (state.currentIndex < state.messages.length - 1) {
       goTo(state.currentIndex + 1);
@@ -644,7 +825,6 @@ Budi: Setuju. Aku siapkan materi presentasinya.`,
   //  KEYBOARD SHORTCUTS
   // ============================================================
   document.addEventListener('keydown', (e) => {
-    // Skip if typing in an input
     if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
 
     switch (e.key) {
@@ -694,11 +874,9 @@ Budi: Setuju. Aku siapkan materi presentasinya.`,
     } else {
       document.exitFullscreen?.().catch(() => {});
     }
-    // Re-render to show proper sizing
     setTimeout(scrollToActive, 100);
   }
 
-  // Listen for Escape from fullscreen
   document.addEventListener('fullscreenchange', () => {
     if (!document.fullscreenElement && state.isFullscreen) {
       state.isFullscreen = false;
@@ -781,8 +959,12 @@ Budi: Setuju. Aku siapkan materi presentasinya.`,
     stopPlay();
     state.messages = [];
     state.currentIndex = -1;
+    
+    // Reset colors and alignments properly
     speakerColors = {};
+    speakerSides = {};
     colorIdx = 0;
+    
     fileInfo.style.display = 'none';
     controls.style.display = 'none';
     emptyState.style.display = 'flex';
@@ -815,16 +997,14 @@ Budi: Setuju. Aku siapkan materi presentasinya.`,
   ]
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-💡 KLIK CONTOH DI BAWAH UNTUK COBA LANGSUNG
+💡 KLIK CONTOH DI ATAS UNTUK MEMUAT TEMPLATE CONTOH LANGSUNG
 `;
   }
 
   // ============================================================
   //  SAMPLE CLICK — load built-in conversation
   // ============================================================
-  // Clicking on the sample area loads the sample JSON data
   document.querySelector('.sample-data summary').addEventListener('click', (e) => {
-    // If currently collapsed, it will open. If no messages loaded, auto-load sample.
     setTimeout(() => {
       if (!state.messages.length) {
         if (confirm('Muat contoh percakapan untuk dicoba?')) {
@@ -836,7 +1016,6 @@ Budi: Setuju. Aku siapkan materi presentasinya.`,
     }, 50);
   });
 
-  // Also load sample if clicking on the pre area
   sampleOutput.addEventListener('dblclick', () => {
     if (!state.messages.length) {
       state.messages = JSON.parse(JSON.stringify(sampleConversations.json));
