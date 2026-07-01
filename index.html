@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Percakapan Presenter</title>
+
+<!-- SheetJS untuk parsing Excel -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<style>
+  /* ===== RESET & BASE ===== */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: #0f172a;
+    color: #e2e8f0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ===== HEADER ===== */
+  header {
+    background: #1e293b;
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    border-bottom: 1px solid #334155;
+    box-shadow: 0 2px 12px rgba(0,0,0,.3);
+    position: relative;
+    z-index: 10;
+  }
+  header h1 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    background: linear-gradient(135deg, #60a5fa, #a78bfa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .header-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  /* ===== BUTTONS ===== */
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 16px; border: none; border-radius: 8px;
+    font-size: .875rem; font-weight: 500; cursor: pointer;
+    transition: all .2s; white-space: nowrap;
+  }
+  .btn:active { transform: scale(.96); }
+  .btn-primary  { background: #3b82f6; color: #fff; }
+  .btn-primary:hover { background: #2563eb; }
+  .btn-success  { background: #22c55e; color: #fff; }
+  .btn-success:hover { background: #16a34a; }
+  .btn-danger   { background: #ef4444; color: #fff; }
+  .btn-danger:hover { background: #dc2626; }
+  .btn-warning  { background: #f59e0b; color: #1e293b; }
+  .btn-warning:hover { background: #d97706; }
+  .btn-ghost    { background: transparent; color: #94a3b8; border:1px solid #334155; }
+  .btn-ghost:hover { background: #1e293b; color: #e2e8f0; }
+  .btn-sm { padding: 5px 10px; font-size: .8rem; }
+  .btn:disabled { opacity: .4; cursor: not-allowed; transform: none; }
+
+  /* ===== MAIN LAYOUT ===== */
+  .main-container {
+    flex: 1; display: flex; flex-direction: column;
+    max-width: 900px; width: 100%; margin: 0 auto;
+    padding: 20px 16px; gap: 16px;
+  }
+
+  /* ===== UPLOAD ZONE ===== */
+  .upload-zone {
+    border: 2px dashed #334155;
+    border-radius: 16px; padding: 40px 20px;
+    text-align: center; cursor: pointer;
+    transition: all .3s; background: #1e293b;
+    position: relative;
+  }
+  .upload-zone:hover, .upload-zone.drag-over {
+    border-color: #3b82f6; background: #1e3a5f;
+  }
+  .upload-zone .icon { font-size: 3rem; margin-bottom: 8px; }
+  .upload-zone p { color: #94a3b8; font-size: .95rem; }
+  .upload-zone .formats {
+    margin-top: 12px; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;
+  }
+  .upload-zone .formats span {
+    background: #334155; padding: 4px 12px; border-radius: 20px;
+    font-size: .8rem; color: #cbd5e1;
+  }
+  .upload-zone input[type="file"] {
+    position: absolute; inset: 0; opacity: 0; cursor: pointer;
+  }
+
+  /* ===== FILE INFO BAR ===== */
+  .file-info {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 16px; background: #1e293b; border-radius: 12px;
+    border: 1px solid #334155;
+  }
+  .file-info .name { font-weight: 500; color: #60a5fa; }
+  .file-info .count { color: #94a3b8; font-size: .875rem; }
+
+  /* ===== CONTROLS BAR ===== */
+  .controls {
+    display: flex; align-items: center; justify-content: center;
+    gap: 8px; padding: 12px 16px;
+    background: #1e293b; border-radius: 12px;
+    border: 1px solid #334155;
+    flex-wrap: wrap;
+  }
+  .controls .nav-group { display: flex; gap: 4px; }
+  .controls .sep {
+    width: 1px; height: 28px; background: #334155; margin: 0 4px;
+  }
+  .controls .counter {
+    font-size: .875rem; color: #94a3b8; min-width: 80px; text-align: center;
+  }
+  .controls .speed-control {
+    display: flex; align-items: center; gap: 6px;
+    font-size: .8rem; color: #94a3b8;
+  }
+  .controls .speed-control input[type="range"] {
+    width: 80px; accent-color: #3b82f6;
+  }
+
+  /* ===== CHAT AREA ===== */
+  .chat-container {
+    flex: 1; display: flex; flex-direction: column;
+    gap: 12px; padding: 20px 16px;
+    background: #1e293b; border-radius: 16px;
+    border: 1px solid #334155;
+    min-height: 400px; max-height: 65vh;
+    overflow-y: auto; position: relative;
+  }
+  .chat-container::-webkit-scrollbar { width: 6px; }
+  .chat-container::-webkit-scrollbar-track { background: transparent; }
+  .chat-container::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+
+  /* ===== EMPTY STATE ===== */
+  .empty-state {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    color: #475569; gap: 12px; text-align: center;
+  }
+  .empty-state .icon { font-size: 4rem; }
+  .empty-state h3 { font-size: 1.2rem; color: #64748b; }
+
+  /* ===== CHAT BUBBLE ===== */
+  .chat-bubble {
+    display: flex; gap: 12px; max-width: 85%;
+    animation: fadeIn .3s ease;
+    opacity: 0.6; transition: all .4s;
+  }
+  .chat-bubble.active {
+    opacity: 1; transform: scale(1.02);
+  }
+  .chat-bubble.active .bubble {
+    box-shadow: 0 0 20px rgba(59,130,246,.25);
+  }
+  .chat-bubble.outgoing { align-self: flex-end; flex-direction: row-reverse; }
+  .chat-bubble.incoming { align-self: flex-start; }
+
+  .chat-bubble .avatar {
+    width: 40px; height: 40px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 1rem; flex-shrink: 0;
+    color: #fff;
+  }
+  .chat-bubble .body { display: flex; flex-direction: column; gap: 4px; }
+  .chat-bubble .speaker-name {
+    font-size: .8rem; font-weight: 600; opacity: .9;
+  }
+  .chat-bubble .bubble {
+    padding: 12px 16px; border-radius: 16px;
+    line-height: 1.6; font-size: 1rem;
+    word-break: break-word;
+    position: relative;
+  }
+  .chat-bubble.incoming .bubble {
+    background: #334155; color: #e2e8f0;
+    border-bottom-left-radius: 4px;
+  }
+  .chat-bubble.outgoing .bubble {
+    background: #3b82f6; color: #fff;
+    border-bottom-right-radius: 4px;
+  }
+  .chat-bubble .timestamp {
+    font-size: .7rem; color: #64748b; margin-top: 2px;
+  }
+
+  /* ===== SAMPLE DATA PREVIEW ===== */
+  .sample-data {
+    background: #1e293b; border-radius: 12px; border: 1px solid #334155;
+    overflow: hidden;
+  }
+  .sample-data summary {
+    padding: 12px 16px; cursor: pointer;
+    font-weight: 500; color: #94a3b8;
+    user-select: none;
+  }
+  .sample-data summary:hover { color: #e2e8f0; }
+  .sample-data pre {
+    padding: 16px; overflow-x: auto; font-size: .8rem;
+    background: #0f172a; color: #a5b4fc; line-height: 1.5;
+    border-top: 1px solid #334155;
+  }
+
+  /* ===== FULLSCREEN MODE ===== */
+  .fullscreen-mode .main-container {
+    max-width: 100%; padding: 0; height: 100vh; margin: 0;
+  }
+  .fullscreen-mode header,
+  .fullscreen-mode .upload-zone,
+  .fullscreen-mode .file-info,
+  .fullscreen-mode .controls,
+  .fullscreen-mode .sample-data { display: none; }
+  .fullscreen-mode .chat-container {
+    max-height: none; border-radius: 0; border: none;
+    min-height: 100vh; flex: 1;
+    justify-content: center; padding: 40px 24px;
+  }
+
+  .fullscreen-mode .controls-overlay {
+    position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+    display: flex; gap: 6px; z-index: 100;
+    background: rgba(15,23,42,.85); backdrop-filter: blur(8px);
+    padding: 8px 12px; border-radius: 40px;
+    border: 1px solid #334155;
+    opacity: 0; transition: opacity .3s;
+  }
+  .fullscreen-mode:hover .controls-overlay { opacity: 1; }
+  .fullscreen-mode .controls-overlay .btn { font-size: .8rem; padding: 4px 10px; }
+
+  /* ===== ANIMATIONS ===== */
+  @keyframes fadeIn {
+    0% { opacity: 0; transform: translateY(12px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 600px) {
+    header h1 { font-size: 1rem; }
+    .chat-bubble { max-width: 95%; }
+    .chat-bubble .bubble { font-size: .9rem; padding: 10px 14px; }
+    .upload-zone { padding: 24px 16px; }
+    .upload-zone .icon { font-size: 2rem; }
+    .controls .speed-control { display: none; }
+  }
+
+  /* ===== HIGHLIGHT ===== */
+  .highlight {
+    background: linear-gradient(120deg, #3b82f6 0%, #8b5cf6 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 600;
+  }
+
+  /* Scroll to bottom button */
+  .scroll-bottom-btn {
+    position: sticky; bottom: 8px; display: none;
+    margin: 0 auto; padding: 6px 16px; border-radius: 20px;
+    background: #334155; color: #94a3b8; border: 1px solid #475569;
+    cursor: pointer; font-size: .8rem; transition: all .2s;
+  }
+  .scroll-bottom-btn:hover { background: #475569; color: #e2e8f0; }
+</style>
+</head>
+<body>
+
+<!-- ===== HEADER ===== -->
+<header>
+  <h1>💬 Percakapan Presenter</h1>
+  <div class="header-actions">
+    <button class="btn btn-ghost btn-sm" onclick="toggleFullscreen()" title="Mode Presentasi">⛶ Fullscreen</button>
+    <button class="btn btn-ghost btn-sm" onclick="resetAll()" title="Reset">⟲ Reset</button>
+  </div>
+</header>
+
+<!-- ===== MAIN ===== -->
+<div class="main-container" id="app">
+  <!-- Upload Zone -->
+  <div class="upload-zone" id="uploadZone">
+    <div class="icon">📂</div>
+    <p><strong>Klik atau tarik file ke sini</strong></p>
+    <p style="font-size:.85rem;margin-top:4px;">File akan diproses otomatis</p>
+    <div class="formats">
+      <span>📊 Excel (.xlsx, .xls)</span>
+      <span>📄 TXT (.txt)</span>
+      <span>📋 JSON (.json)</span>
+    </div>
+    <input type="file" id="fileInput" accept=".xlsx,.xls,.txt,.json">
+  </div>
+
+  <!-- File Info -->
+  <div class="file-info" id="fileInfo" style="display:none;">
+    <span class="name" id="fileName"></span>
+    <span class="count" id="msgCount"></span>
+    <button class="btn btn-danger btn-sm" onclick="resetAll()">✕ Tutup</button>
+  </div>
+
+  <!-- Controls -->
+  <div class="controls" id="controls" style="display:none;">
+    <div class="nav-group">
+      <button class="btn btn-ghost btn-sm" onclick="goFirst()" title="Awal">⏮</button>
+      <button class="btn btn-ghost btn-sm" onclick="goPrev()" title="Sebelumnya">◀</button>
+    </div>
+    <span class="counter" id="counter">0 / 0</span>
+    <div class="nav-group">
+      <button class="btn btn-ghost btn-sm" onclick="goNext()" title="Selanjutnya">▶</button>
+      <button class="btn btn-ghost btn-sm" onclick="goLast()" title="Akhir">⏭</button>
+    </div>
+    <div class="sep"></div>
+    <button class="btn btn-success btn-sm" id="playBtn" onclick="togglePlay()">▶ Putar</button>
+    <div class="sep"></div>
+    <div class="speed-control">
+      ⏱
+      <input type="range" id="speedRange" min="1" max="10" value="3">
+      <span id="speedLabel">3 dtk</span>
+    </div>
+  </div>
+
+  <!-- Chat Container -->
+  <div class="chat-container" id="chatContainer">
+    <div class="empty-state" id="emptyState">
+      <div class="icon">💬</div>
+      <h3>Belum ada percakapan</h3>
+      <p style="color:#64748b;">Upload file Excel, TXT, atau JSON untuk memulai</p>
+      <div style="margin-top:16px;font-size:.85rem;color:#475569;">
+        <p>📌 Format file:</p>
+        <div style="text-align:left;margin-top:8px;">
+          <b>Excel:</b> Kolom A = speaker, Kolom B = teks<br>
+          <b>TXT:</b> <code>Nama: teks</code> tiap baris<br>
+          <b>JSON:</b> Array objek <code>{"speaker":"","text":""}</code>
+        </div>
+      </div>
+    </div>
+    <div id="chatMessages"></div>
+    <button class="scroll-bottom-btn" id="scrollBtn" onclick="scrollToBottom()">↓ Ke bawah</button>
+  </div>
+
+  <!-- Sample Data -->
+  <details class="sample-data">
+    <summary>📝 Lihat contoh format file</summary>
+    <pre id="sampleOutput">Memuat contoh...</pre>
+  </details>
+</div>
+
+<!-- ===== FULLSCREEN OVERLAY CONTROLS ===== -->
+<div class="controls-overlay" id="fullscreenControls" style="display:none;">
+  <button class="btn btn-ghost btn-sm" onclick="goFirst()">⏮</button>
+  <button class="btn btn-ghost btn-sm" onclick="goPrev()">◀</button>
+  <span class="counter" style="font-size:.8rem;color:#94a3b8;min-width:60px;text-align:center;" id="fsCounter"></span>
+  <button class="btn btn-ghost btn-sm" onclick="goNext()">▶</button>
+  <button class="btn btn-ghost btn-sm" onclick="goLast()">⏭</button>
+  <button class="btn btn-success btn-sm" id="fsPlayBtn" onclick="togglePlay()">▶</button>
+  <button class="btn btn-ghost btn-sm" onclick="toggleFullscreen()">✕</button>
+</div>
+
+<script>
+  // ============================================================
+  //  STATE
+  // ============================================================
+  const state = {
+    messages: [],       // [{speaker, text}]
+    currentIndex: -1,
+    isPlaying: false,
+    playTimer: null,
+    speed: 3,           // detik
+    isFullscreen: false,
+  };
+
+  // Warna untuk setiap speaker
+  const speakerColors = {};
+  const palette = [
+    '#3b82f6', '#ef4444', '#22c55e', '#f59e0b', '#a855f7',
+    '#ec4899', '#06b6d4', '#84cc16', '#f97316', '#8b5cf6',
+    '#14b8a6', '#e11d48', '#0ea5e9', '#d946ef', '#10b981',
+  ];
+  let colorIdx = 0;
+
+  function getSpeakerColor(speaker) {
+    if (!speakerColors[speaker]) {
+      speakerColors[speaker] = palette[colorIdx % palette.length];
+      colorIdx++;
+    }
+    return speakerColors[speaker];
+  }
+
+  function getInitials(name) {
+    return name ? name.charAt(0).toUpperCase() : '?';
+  }
+
+  // ============================================================
+  //  DOM REFS
+  // ============================================================
+  const $ = id => document.getElementById(id);
+  const chatMessages = $('chatMessages');
+  const emptyState = $('emptyState');
+  const fileInput = $('fileInput');
+  const uploadZone = $('uploadZone');
+  const fileInfo = $('fileInfo');
+  const fileName = $('fileName');
+  const msgCount = $('msgCount');
+  const controls = $('controls');
+  const counter = $('counter');
+  const playBtn = $('playBtn');
+  const speedRange = $('speedRange');
+  const speedLabel = $('speedLabel');
+  const scrollBtn = $('scrollBtn');
+  const fsControls = $('fullscreenControls');
+  const fsCounter = $('fsCounter');
+  const fsPlayBtn = $('fsPlayBtn');
+  const sampleOutput = $('sampleOutput');
+
+  // ============================================================
+  //  SAMPLE DATA
+  // ============================================================
+  const sampleConversations = {
+    json: [
+      { speaker: 'Andi', text: 'Halo Budi! Selamat pagi. Apa kabarmu hari ini?' },
+      { speaker: 'Budi', text: 'Selamat pagi Andi! Kabarku baik. Kamu sendiri bagaimana?' },
+      { speaker: 'Andi', text: 'Baik juga. Ngomong-ngomong, bagaimana dengan proyek kemarin?' },
+      { speaker: 'Budi', text: 'Sudah selesai 80%. Tinggal bagian testing saja.' },
+      { speaker: 'Andi', text: 'Bagus! Kalau begitu kita bisa presentasi hari Jumat.' },
+      { speaker: 'Budi', text: 'Setuju. Aku siapkan materi presentasinya.' },
+    ],
+    txt: `Andi: Halo Budi! Selamat pagi. Apa kabarmu hari ini?
+Budi: Selamat pagi Andi! Kabarku baik. Kamu sendiri bagaimana?
+Andi: Baik juga. Ngomong-ngomong, bagaimana dengan proyek kemarin?
+Budi: Sudah selesai 80%. Tinggal bagian testing saja.
+Andi: Bagus! Kalau begitu kita bisa presentasi hari Jumat.
+Budi: Setuju. Aku siapkan materi presentasinya.`,
+  };
+
+  // ============================================================
+  //  FILE PARSING
+  // ============================================================
+  function parseTXT(text) {
+    const lines = text.split(/\r?\n/).filter(l => l.trim());
+    const messages = [];
+    for (const line of lines) {
+      // Format: "Speaker: teks" — split on first colon
+      const idx = line.indexOf(':');
+      if (idx > 0) {
+        const speaker = line.slice(0, idx).trim();
+        const text = line.slice(idx + 1).trim();
+        if (speaker && text) {
+          messages.push({ speaker, text });
+        }
+      }
+    }
+    return messages;
+  }
+
+  function parseJSON(text) {
+    const data = JSON.parse(text);
+    if (!Array.isArray(data)) throw new Error('JSON harus berupa array');
+    for (const item of data) {
+      if (!item.speaker || !item.text) {
+        throw new Error('Setiap item harus memiliki field "speaker" dan "text"');
+      }
+    }
+    return data;
+  }
+
+  function parseXLSX(data) {
+    const wb = XLSX.read(data, { type: 'array' });
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    const rows = XLSX.utils.sheet_to_json(ws, { header: 1 });
+    const messages = [];
+    for (const row of rows) {
+      const speaker = String(row[0] || '').trim();
+      const text = String(row[1] || '').trim();
+      if (speaker && text) {
+        messages.push({ speaker, text });
+      }
+    }
+    return messages;
+  }
+
+  // ============================================================
+  //  RENDER
+  // ============================================================
+  function render() {
+    if (!state.messages.length) {
+      emptyState.style.display = 'flex';
+      chatMessages.innerHTML = '';
+      fileInfo.style.display = 'none';
+      controls.style.display = 'none';
+      return;
+    }
+
+    emptyState.style.display = 'none';
+    fileInfo.style.display = 'flex';
+    controls.style.display = 'flex';
+    msgCount.textContent = `${state.messages.length} pesan`;
+
+    // Render all messages
+    chatMessages.innerHTML = state.messages.map((msg, i) => {
+      const isActive = i === state.currentIndex;
+      const color = getSpeakerColor(msg.speaker);
+      const initials = getInitials(msg.speaker);
+      const side = i % 2 === 0 ? 'incoming' : 'outgoing';
+      return `
+        <div class="chat-bubble ${side} ${isActive ? 'active' : ''}" data-index="${i}">
+          <div class="avatar" style="background:${color}">${initials}</div>
+          <div class="body">
+            <span class="speaker-name" style="color:${color}">${escapeHtml(msg.speaker)}</span>
+            <div class="bubble">${escapeHtml(msg.text)}</div>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    updateCounter();
+    scrollToActive();
+    updatePlayButton();
+  }
+
+  function scrollToActive() {
+    const active = chatMessages.querySelector('.chat-bubble.active');
+    if (active) {
+      active.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }
+
+  function scrollToBottom() {
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+    scrollBtn.style.display = 'none';
+  }
+
+  function updateCounter() {
+    const total = state.messages.length;
+    const idx = state.currentIndex + 1;
+    const text = total > 0 ? `${idx} / ${total}` : '0 / 0';
+    counter.textContent = text;
+    fsCounter.textContent = text;
+  }
+
+  function updatePlayButton() {
+    const isPlaying = state.isPlaying;
+    const label = isPlaying ? '⏸ Stop' : '▶ Putar';
+    playBtn.textContent = label;
+    fsPlayBtn.textContent = isPlaying ? '⏸' : '▶';
+    playBtn.className = `btn ${isPlaying ? 'btn-warning' : 'btn-success'} btn-sm`;
+    fsPlayBtn.className = `btn ${isPlaying ? 'btn-warning' : 'btn-success'} btn-sm`;
+  }
+
+  function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  // ============================================================
+  //  NAVIGATION
+  // ============================================================
+  function goTo(index) {
+    if (!state.messages.length) return;
+    state.currentIndex = Math.max(0, Math.min(index, state.messages.length - 1));
+    render();
+  }
+
+  function goNext() {
+    if (state.currentIndex < state.messages.length - 1) {
+      goTo(state.currentIndex + 1);
+    } else if (state.isPlaying) {
+      stopPlay();
+    }
+  }
+
+  function goPrev() {
+    if (state.currentIndex > 0) goTo(state.currentIndex - 1);
+  }
+
+  function goFirst() { goTo(0); }
+  function goLast() { goTo(state.messages.length - 1); }
+
+  // ============================================================
+  //  PLAYBACK
+  // ============================================================
+  function togglePlay() {
+    if (state.isPlaying) {
+      stopPlay();
+    } else {
+      startPlay();
+    }
+  }
+
+  function startPlay() {
+    if (!state.messages.length) return;
+    if (state.currentIndex >= state.messages.length - 1) {
+      goTo(0);
+    }
+    state.isPlaying = true;
+    updatePlayButton();
+    tickPlay();
+  }
+
+  function stopPlay() {
+    state.isPlaying = false;
+    if (state.playTimer) {
+      clearTimeout(state.playTimer);
+      state.playTimer = null;
+    }
+    updatePlayButton();
+  }
+
+  function tickPlay() {
+    if (!state.isPlaying) return;
+    if (state.currentIndex >= state.messages.length - 1) {
+      stopPlay();
+      return;
+    }
+    goNext();
+    state.playTimer = setTimeout(tickPlay, state.speed * 1000);
+  }
+
+  // ============================================================
+  //  SPEED CONTROL
+  // ============================================================
+  speedRange.addEventListener('input', () => {
+    state.speed = parseInt(speedRange.value);
+    speedLabel.textContent = `${state.speed} dtk`;
+    if (state.isPlaying) {
+      clearTimeout(state.playTimer);
+      state.playTimer = setTimeout(tickPlay, state.speed * 1000);
+    }
+  });
+
+  // ============================================================
+  //  SCROLL DETECT
+  // ============================================================
+  chatMessages.addEventListener('scroll', () => {
+    const { scrollTop, scrollHeight, clientHeight } = chatMessages;
+    scrollBtn.style.display = (scrollHeight - scrollTop - clientHeight > 100) ? 'block' : 'none';
+  });
+
+  // ============================================================
+  //  KEYBOARD SHORTCUTS
+  // ============================================================
+  document.addEventListener('keydown', (e) => {
+    // Skip if typing in an input
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+    switch (e.key) {
+      case 'ArrowRight':
+      case ' ':
+        e.preventDefault();
+        if (state.isPlaying) togglePlay();
+        else goNext();
+        break;
+      case 'ArrowLeft':
+        e.preventDefault();
+        if (state.isPlaying) togglePlay();
+        else goPrev();
+        break;
+      case 'Home':
+        e.preventDefault();
+        goFirst();
+        break;
+      case 'End':
+        e.preventDefault();
+        goLast();
+        break;
+      case 'Enter':
+        e.preventDefault();
+        togglePlay();
+        break;
+      case 'f':
+      case 'F':
+        toggleFullscreen();
+        break;
+      case 'Escape':
+        if (state.isFullscreen) toggleFullscreen();
+        if (state.isPlaying) stopPlay();
+        break;
+    }
+  });
+
+  // ============================================================
+  //  FULLSCREEN
+  // ============================================================
+  function toggleFullscreen() {
+    state.isFullscreen = !state.isFullscreen;
+    document.body.classList.toggle('fullscreen-mode', state.isFullscreen);
+    fsControls.style.display = state.isFullscreen ? 'flex' : 'none';
+    if (state.isFullscreen) {
+      document.documentElement.requestFullscreen?.().catch(() => {});
+    } else {
+      document.exitFullscreen?.().catch(() => {});
+    }
+    // Re-render to show proper sizing
+    setTimeout(scrollToActive, 100);
+  }
+
+  // Listen for Escape from fullscreen
+  document.addEventListener('fullscreenchange', () => {
+    if (!document.fullscreenElement && state.isFullscreen) {
+      state.isFullscreen = false;
+      document.body.classList.remove('fullscreen-mode');
+      fsControls.style.display = 'none';
+    }
+  });
+
+  // ============================================================
+  //  FILE UPLOAD HANDLING
+  // ============================================================
+  function processFile(file) {
+    const ext = file.name.split('.').pop().toLowerCase();
+    fileName.textContent = `📄 ${file.name}`;
+
+    if (ext === 'txt') {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          state.messages = parseTXT(e.target.result);
+          goTo(0);
+        } catch (err) {
+          alert('Gagal parsing TXT: ' + err.message);
+        }
+      };
+      reader.readAsText(file);
+    } else if (ext === 'json') {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          state.messages = parseJSON(e.target.result);
+          goTo(0);
+        } catch (err) {
+          alert('Gagal parsing JSON: ' + err.message);
+        }
+      };
+      reader.readAsText(file);
+    } else if (ext === 'xlsx' || ext === 'xls') {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          state.messages = parseXLSX(new Uint8Array(e.target.result));
+          goTo(0);
+        } catch (err) {
+          alert('Gagal parsing Excel: ' + err.message);
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    } else {
+      alert('Format file tidak didukung. Gunakan .xlsx, .txt, atau .json');
+    }
+  }
+
+  fileInput.addEventListener('change', () => {
+    if (fileInput.files.length > 0) {
+      processFile(fileInput.files[0]);
+      fileInput.value = '';
+    }
+  });
+
+  // Drag & Drop
+  uploadZone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    uploadZone.classList.add('drag-over');
+  });
+  uploadZone.addEventListener('dragleave', () => {
+    uploadZone.classList.remove('drag-over');
+  });
+  uploadZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    uploadZone.classList.remove('drag-over');
+    const files = e.dataTransfer.files;
+    if (files.length > 0) processFile(files[0]);
+  });
+
+  // ============================================================
+  //  RESET
+  // ============================================================
+  function resetAll() {
+    stopPlay();
+    state.messages = [];
+    state.currentIndex = -1;
+    speakerColors = {};
+    colorIdx = 0;
+    fileInfo.style.display = 'none';
+    controls.style.display = 'none';
+    emptyState.style.display = 'flex';
+    chatMessages.innerHTML = '';
+    updateCounter();
+    if (state.isFullscreen) toggleFullscreen();
+  }
+
+  // ============================================================
+  //  SHOW SAMPLES
+  // ============================================================
+  function renderSamples() {
+    sampleOutput.textContent =
+`📊 FORMAT EXCEL (.xlsx)
+  Kolom A        | Kolom B
+  -------------- | -----------------------------------
+  Andi           | Halo Budi! Selamat pagi.
+  Budi           | Selamat pagi Andi! Kabarku baik.
+  (dst)          | (dst)
+
+📄 FORMAT TXT (.txt)
+  Andi: Halo Budi! Selamat pagi. Apa kabarmu hari ini?
+  Budi: Selamat pagi Andi! Kabarku baik. Kamu sendiri bagaimana?
+  Andi: Baik juga. Ngomong-ngomong, bagaimana dengan proyek kemarin?
+
+📋 FORMAT JSON (.json)
+  [
+    { "speaker": "Andi", "text": "Halo Budi! Selamat pagi." },
+    { "speaker": "Budi", "text": "Selamat pagi Andi! Kabarku baik." }
+  ]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+💡 KLIK CONTOH DI BAWAH UNTUK COBA LANGSUNG
+`;
+  }
+
+  // ============================================================
+  //  SAMPLE CLICK — load built-in conversation
+  // ============================================================
+  // Clicking on the sample area loads the sample JSON data
+  document.querySelector('.sample-data summary').addEventListener('click', (e) => {
+    // If currently collapsed, it will open. If no messages loaded, auto-load sample.
+    setTimeout(() => {
+      if (!state.messages.length) {
+        if (confirm('Muat contoh percakapan untuk dicoba?')) {
+          state.messages = JSON.parse(JSON.stringify(sampleConversations.json));
+          fileName.textContent = '📄 Contoh Percakapan';
+          goTo(0);
+        }
+      }
+    }, 50);
+  });
+
+  // Also load sample if clicking on the pre area
+  sampleOutput.addEventListener('dblclick', () => {
+    if (!state.messages.length) {
+      state.messages = JSON.parse(JSON.stringify(sampleConversations.json));
+      fileName.textContent = '📄 Contoh Percakapan';
+      goTo(0);
+    }
+  });
+
+  // ============================================================
+  //  INIT
+  // ============================================================
+  renderSamples();
+  updateCounter();
+  updatePlayButton();
+</script>
+</body>
+</html>

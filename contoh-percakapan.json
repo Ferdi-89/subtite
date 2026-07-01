@@ -1,0 +1,12 @@
+[
+  { "speaker": "Ahmad", "text": "Selamat siang, Bu Sarah. Terima kasih sudah meluangkan waktu untuk bertemu hari ini." },
+  { "speaker": "Sarah", "text": "Selamat siang, Pak Ahmad. Tentu saja, saya juga senang bisa bertemu. Ada yang ingin dibahas?" },
+  { "speaker": "Ahmad", "text": "Begini, Bu. Perusahaan kami tertarik untuk menjalin kerja sama dengan perusahaan Ibu dalam pengembangan aplikasi mobile." },
+  { "speaker": "Sarah", "text": "Wah, menarik sekali! Bisa cerita lebih detail tentang rencana kerja samanya?" },
+  { "speaker": "Ahmad", "text": "Tentu. Kami sedang mengembangkan platform e-commerce dan membutuhkan mitra untuk sisi logistik dan pengiriman." },
+  { "speaker": "Sarah", "text": "I see. Kebetulan perusahaan kami memang fokus di bidang logistik. Kira-kira target penggunaannya kapan?" },
+  { "speaker": "Ahmad", "text": "Kami menargetkan peluncuran awal tahun depan, jadi masih ada waktu sekitar 6 bulan untuk persiapan." },
+  { "speaker": "Sarah", "text": "Cukup waktu yang baik. Saya rasa kita bisa mulai dengan meeting teknis minggu depan bersama tim." },
+  { "speaker": "Ahmad", "text": "Setuju! Saya akan koordinasikan jadwalnya. Terima kasih banyak, Bu Sarah." },
+  { "speaker": "Sarah", "text": "Sama-sama, Pak Ahmad. Saya tunggu ya." }
+]

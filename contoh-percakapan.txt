@@ -1,0 +1,12 @@
+Andi: Halo Budi, apa kabar hari ini?
+Budi: Hai Andi! Kabarku baik. Kamu sendiri bagaimana?
+Andi: Baik juga. Ada yang mau aku diskusikan nih.
+Budi: Silakan, ada apa?
+Andi: Bagaimana pendapatmu tentang desain aplikasi terbaru kita?
+Budi: Menurutku sudah cukup bagus, tapi ada beberapa bagian yang perlu diperbaiki.
+Andi: Bagian mana misalnya?
+Budi: Bagian navigasi menu menurutku masih kurang intuitif.
+Andi: Saranmu bagus. Aku akan diskusikan dengan tim developer.
+Budi: Kalau perlu, aku bisa bantu buatkan mockup alternatifnya.
+Andi: Wah, itu akan sangat membantu! Terima kasih Budi.
+Budi: Sama-sama Andi. Kita sukseskan project ini bersama!
