@@ -123,7 +123,7 @@
   /* ===== UPLOAD ZONE ===== */
   .upload-zone {
     border: 2px dashed rgba(255, 255, 255, 0.15);
-    border-radius: 24px; padding: 50px 24px;
+    border-radius: 20px; padding: 24px 20px;
     text-align: center; cursor: pointer;
     transition: all .3s ease; 
     background: var(--bg-card);
@@ -138,21 +138,21 @@
     box-shadow: 0 8px 32px rgba(59, 130, 246, 0.1);
   }
   .upload-zone .icon { 
-    font-size: 3.5rem; 
-    margin-bottom: 16px;
+    font-size: 2.2rem; 
+    margin-bottom: 8px;
     background: linear-gradient(135deg, #3b82f6, #a78bfa);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
   }
-  .upload-zone p { color: var(--text-muted); font-size: 1rem; }
+  .upload-zone p { color: var(--text-muted); font-size: 0.9rem; }
   .upload-zone .formats {
-    margin-top: 20px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;
+    margin-top: 12px; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;
   }
   .upload-zone .formats span {
     background: rgba(255, 255, 255, 0.05); 
-    padding: 6px 16px; 
+    padding: 4px 12px; 
     border-radius: 30px;
-    font-size: .8rem; 
+    font-size: 0.75rem; 
     color: #d1d5db;
     border: 1px solid var(--border-color);
   }
@@ -426,6 +426,11 @@
 <header>
   <h1><span>💬</span> Percakapan Presenter Pro</h1>
   <div class="header-actions">
+    <!-- Compact Nav File Input Button -->
+    <div class="btn btn-ghost btn-sm" id="navUploadBtn" style="position: relative; display: none; align-items: center; gap: 8px;">
+      <span>📂 Unggah Baru</span>
+      <input type="file" id="navFileInput" accept=".xlsx,.xls,.txt,.json" style="position: absolute; inset: 0; opacity: 0; cursor: pointer;">
+    </div>
     <button class="btn btn-ghost btn-sm" onclick="toggleFullscreen()" title="Mode Presentasi">⛶ Fullscreen</button>
     <button class="btn btn-ghost btn-sm" onclick="resetAll()" title="Reset">⟲ Reset</button>
   </div>
@@ -436,8 +441,8 @@
   <!-- Upload Zone -->
   <div class="upload-zone" id="uploadZone">
     <div class="icon">📂</div>
-    <p style="font-size: 1.15rem; font-weight: 700; color: #f3f4f6; margin-bottom: 6px;">Tarik & Lepas File di Sini</p>
-    <p style="font-size:.9rem; color: var(--text-muted);">Mendukung format file modern Excel, TXT, dan JSON</p>
+    <p style="font-size: 1rem; font-weight: 700; color: #f3f4f6; margin-bottom: 4px;">Tarik & Lepas File di Sini</p>
+    <p style="font-size: 0.8rem; color: var(--text-muted);">Mendukung format file modern Excel, TXT, dan JSON</p>
     <div class="formats">
       <span>📊 Excel (.xlsx, .xls)</span>
       <span>📄 TXT (.txt)</span>
@@ -574,6 +579,8 @@
   const fsCounter = $('fsCounter');
   const fsPlayBtn = $('fsPlayBtn');
   const sampleOutput = $('sampleOutput');
+  const navUploadBtn = $('navUploadBtn');
+  const navFileInput = $('navFileInput');
 
   // ============================================================
   //  SAMPLE DATA
@@ -644,12 +651,16 @@
       chatMessages.innerHTML = '';
       fileInfo.style.display = 'none';
       controls.style.display = 'none';
+      uploadZone.style.display = 'block';
+      navUploadBtn.style.display = 'none';
       return;
     }
 
     emptyState.style.display = 'none';
     fileInfo.style.display = 'flex';
     controls.style.display = 'flex';
+    uploadZone.style.display = 'none';
+    navUploadBtn.style.display = 'inline-flex';
     msgCount.textContent = `${state.messages.length} pesan`;
 
     // Render all messages
@@ -940,6 +951,13 @@
     }
   });
 
+  navFileInput.addEventListener('change', () => {
+    if (navFileInput.files.length > 0) {
+      processFile(navFileInput.files[0]);
+      navFileInput.value = '';
+    }
+  });
+
   // Drag & Drop
   uploadZone.addEventListener('dragover', (e) => {
     e.preventDefault();
@@ -972,6 +990,8 @@
     controls.style.display = 'none';
     emptyState.style.display = 'flex';
     chatMessages.innerHTML = '';
+    uploadZone.style.display = 'block';
+    navUploadBtn.style.display = 'none';
     updateCounter();
     if (state.isFullscreen) toggleFullscreen();
   }
